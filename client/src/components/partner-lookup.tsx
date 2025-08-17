@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,21 @@ export default function PartnerLookup({ onPartnerFound, onPartnerNotFound }: Par
     retry: false,
   });
 
+  // Handle query results in useEffect to avoid state updates during render
+  useEffect(() => {
+    if (partner && shouldLookup) {
+      onPartnerFound(partner);
+      setShouldLookup(false);
+    }
+  }, [partner, shouldLookup, onPartnerFound]);
+
+  useEffect(() => {
+    if (error && shouldLookup) {
+      onPartnerNotFound();
+      setShouldLookup(false);
+    }
+  }, [error, shouldLookup, onPartnerNotFound]);
+
   const handleInputChange = (value: string) => {
     // Only allow digits and limit to 4 characters
     const filteredValue = value.replace(/\D/g, "").slice(0, 4);
@@ -35,18 +50,6 @@ export default function PartnerLookup({ onPartnerFound, onPartnerNotFound }: Par
       // Show error for invalid format
     }
   };
-
-  // Handle successful partner lookup
-  if (partner && shouldLookup) {
-    onPartnerFound(partner);
-    setShouldLookup(false);
-  }
-
-  // Handle failed partner lookup
-  if (error && shouldLookup) {
-    onPartnerNotFound();
-    setShouldLookup(false);
-  }
 
   const showError = error && partnerId.length === 4;
   const showFormatError = partnerId.length > 0 && partnerId.length < 4;

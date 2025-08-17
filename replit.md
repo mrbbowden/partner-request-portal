@@ -1,6 +1,6 @@
 # Overview
 
-This is a full-stack Partner Request Portal application built with a React frontend and Express.js backend. The application allows partners to submit service requests by first verifying their partner ID, then filling out a detailed request form. The system uses a clean, modern UI with shadcn/ui components and Tailwind CSS for styling.
+This is a full-stack Partner Request Portal application built with a React frontend and Express.js backend. The application allows partners to submit service requests by first verifying their 4-digit partner ID, then filling out a detailed request form. When a partner enters their ID and the cursor leaves the field, the app automatically looks up their information and prefills the form with their name, email, and phone number. The system uses a clean, modern UI with shadcn/ui components and Tailwind CSS for styling.
 
 # User Preferences
 
