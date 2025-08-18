@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -10,9 +10,23 @@ interface PartnerLookupProps {
   onPartnerNotFound: () => void;
 }
 
-export default function PartnerLookup({ onPartnerFound, onPartnerNotFound }: PartnerLookupProps) {
+export interface PartnerLookupRef {
+  clearPartnerId: () => void;
+}
+
+const PartnerLookup = forwardRef<PartnerLookupRef, PartnerLookupProps>(
+  ({ onPartnerFound, onPartnerNotFound }, ref) => {
   const [partnerId, setPartnerId] = useState("");
   const [shouldLookup, setShouldLookup] = useState(false);
+
+  // Expose clearPartnerId method to parent component
+  useImperativeHandle(ref, () => ({
+    clearPartnerId: () => {
+      setPartnerId("");
+      setShouldLookup(false);
+      onPartnerNotFound();
+    }
+  }));
 
   const { data: partner, isLoading, error } = useQuery({
     queryKey: ["/api/partners", partnerId],
@@ -109,4 +123,8 @@ export default function PartnerLookup({ onPartnerFound, onPartnerNotFound }: Par
       </div>
     </div>
   );
-}
+});
+
+PartnerLookup.displayName = "PartnerLookup";
+
+export default PartnerLookup;

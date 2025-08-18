@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Handshake, User } from "lucide-react";
-import PartnerLookup from "@/components/partner-lookup";
+import PartnerLookup, { type PartnerLookupRef } from "@/components/partner-lookup";
 import PartnerInfo from "@/components/partner-info";
 import RequestForm from "@/components/request-form";
 import type { Partner } from "@shared/schema";
@@ -8,6 +8,7 @@ import type { Partner } from "@shared/schema";
 export default function PartnerPortal() {
   const [partner, setPartner] = useState<Partner | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const partnerLookupRef = useRef<PartnerLookupRef>(null);
 
   const handlePartnerFound = (foundPartner: Partner) => {
     setPartner(foundPartner);
@@ -21,11 +22,17 @@ export default function PartnerPortal() {
   const handleRequestSubmitted = () => {
     setShowSuccess(true);
     setPartner(null);
+    partnerLookupRef.current?.clearPartnerId();
     
     // Hide success message after 5 seconds
     setTimeout(() => {
       setShowSuccess(false);
     }, 5000);
+  };
+
+  const handleClearForm = () => {
+    setPartner(null);
+    partnerLookupRef.current?.clearPartnerId();
   };
 
   return (
@@ -51,6 +58,7 @@ export default function PartnerPortal() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Partner Lookup */}
         <PartnerLookup
+          ref={partnerLookupRef}
           onPartnerFound={handlePartnerFound}
           onPartnerNotFound={handlePartnerNotFound}
         />
@@ -63,6 +71,7 @@ export default function PartnerPortal() {
           <RequestForm
             partner={partner}
             onRequestSubmitted={handleRequestSubmitted}
+            onClearForm={handleClearForm}
           />
         )}
 

@@ -31,9 +31,10 @@ type RequestFormData = z.infer<typeof requestFormSchema>;
 interface RequestFormProps {
   partner: Partner;
   onRequestSubmitted: () => void;
+  onClearForm?: () => void;
 }
 
-export default function RequestForm({ partner, onRequestSubmitted }: RequestFormProps) {
+export default function RequestForm({ partner, onRequestSubmitted, onClearForm }: RequestFormProps) {
   const { toast } = useToast();
 
   const form = useForm<RequestFormData>({
@@ -87,6 +88,10 @@ export default function RequestForm({ partner, onRequestSubmitted }: RequestForm
       urgency: "",
       description: "",
     });
+    // Call the parent callback to clear partner information
+    if (onClearForm) {
+      onClearForm();
+    }
   };
 
   return (
