@@ -1,0 +1,12 @@
+
+name = "partner-portal-ui"
+compatibility_date = "2024-01-01"
+
+[build]
+command = "npm run build"
+
+[build.output]
+directory = "dist"
+
+[site]
+bucket = "./dist"
