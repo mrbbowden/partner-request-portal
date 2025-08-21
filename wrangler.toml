@@ -1,5 +1,6 @@
 
 name = "partner-portal-ui"
+pages_build_output_dir = "dist"
 compatibility_date = "2024-01-01"
 
 [build]
@@ -10,3 +11,4 @@ directory = "dist"
 
 [site]
 bucket = "./dist/public"
+
