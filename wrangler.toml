@@ -9,4 +9,4 @@ command = "npm run build"
 directory = "dist"
 
 [site]
-bucket = "./dist"
+bucket = "./dist/public"
