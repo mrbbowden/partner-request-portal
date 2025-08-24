@@ -44,8 +44,16 @@ export async function onRequest(context: any) {
         );
       }
 
+      // Transform the data to match the expected schema
+      const transformedResult = {
+        id: result.id,
+        fullName: result.full_name,
+        email: result.email,
+        phone: result.phone,
+      };
+
       return new Response(
-        JSON.stringify(result), 
+        JSON.stringify(transformedResult), 
         { headers: { 'Content-Type': 'application/json' } }
       );
     } catch (dbError) {

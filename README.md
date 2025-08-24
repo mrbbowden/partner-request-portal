@@ -6,6 +6,7 @@ A modern web application for managing partner requests, built with React, TypeSc
 
 - **Partner Authentication**: Partners authenticate using their 4-digit Partner ID
 - **Request Submission**: Submit various types of requests (technical support, billing, etc.)
+- **Admin Panel**: Password-protected database management interface
 - **Zapier Integration**: Automatic webhook integration for external service connections
 - **Modern UI**: Built with React, Tailwind CSS, and shadcn/ui components
 - **Cloudflare Workers**: Serverless deployment on Cloudflare's edge network
@@ -82,6 +83,33 @@ npm run build
 npm run deploy
 ```
 
+## Admin Panel
+
+The application includes a password-protected admin panel for managing database entries.
+
+### Access
+- **URL**: `/admin`
+- **Password**: `scooby`
+
+### Features
+- **Partner Management**: View, add, edit, and delete partners
+- **Request Management**: View, add, edit, and delete requests
+- **Real-time Updates**: Changes are immediately reflected in the database
+- **Validation**: Form validation with error handling
+- **Responsive Design**: Works on desktop and mobile devices
+
+### API Endpoints
+- `GET /api/admin/partners` - List all partners
+- `POST /api/admin/partners` - Create new partner
+- `PUT /api/admin/partners/:id` - Update partner
+- `DELETE /api/admin/partners/:id` - Delete partner
+- `GET /api/admin/requests` - List all requests
+- `POST /api/admin/requests` - Create new request
+- `PUT /api/admin/requests/:id` - Update request
+- `DELETE /api/admin/requests/:id` - Delete request
+
+All admin endpoints require authentication using the Bearer token: `scooby`
+
 ## Project Structure
 
 ```
@@ -105,9 +133,20 @@ npm run deploy
 
 ## API Endpoints
 
+### Public Endpoints
 - `GET /api/partners/:id` - Look up partner by ID
 - `POST /api/requests` - Submit a new request
 - `POST /api/zapier/webhook` - Test Zapier webhook endpoint
+
+### Admin Endpoints (Require Authentication)
+- `GET /api/admin/partners` - List all partners
+- `POST /api/admin/partners` - Create new partner
+- `PUT /api/admin/partners/:id` - Update partner
+- `DELETE /api/admin/partners/:id` - Delete partner
+- `GET /api/admin/requests` - List all requests
+- `POST /api/admin/requests` - Create new request
+- `PUT /api/admin/requests/:id` - Update request
+- `DELETE /api/admin/requests/:id` - Delete request
 
 ## Database Schema
 

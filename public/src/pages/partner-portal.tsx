@@ -1,14 +1,35 @@
-import { useState, useRef } from "react";
-import { Handshake, User } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Handshake, User, Settings } from "lucide-react";
+import { Link } from "wouter";
 import PartnerLookup, { type PartnerLookupRef } from "@/components/partner-lookup";
 import PartnerInfo from "@/components/partner-info";
 import RequestForm from "@/components/request-form";
 import type { Partner } from "@shared/schema";
+import { getPartnerIdCookie } from "@/lib/cookies";
 
 export default function PartnerPortal() {
   const [partner, setPartner] = useState<Partner | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [initialPartnerId, setInitialPartnerId] = useState<string | undefined>(undefined);
   const partnerLookupRef = useRef<PartnerLookupRef>(null);
+
+  // Check for existing partner ID cookie on component mount
+  useEffect(() => {
+    console.log("PartnerPortal: Checking for saved partner ID cookie...");
+    const savedPartnerId = getPartnerIdCookie();
+    console.log("PartnerPortal: Cookie check result:", savedPartnerId);
+    if (savedPartnerId) {
+      console.log("PartnerPortal: Found saved partner ID in cookie:", savedPartnerId);
+      setInitialPartnerId(savedPartnerId);
+    } else {
+      console.log("PartnerPortal: No saved partner ID found");
+    }
+  }, []);
+
+  // Debug initialPartnerId changes
+  useEffect(() => {
+    console.log("PartnerPortal: initialPartnerId changed to:", initialPartnerId);
+  }, [initialPartnerId]);
 
   const handlePartnerFound = (foundPartner: Partner) => {
     setPartner(foundPartner);
@@ -47,9 +68,15 @@ export default function PartnerPortal() {
               </div>
               <h1 className="text-xl font-semibold text-gray-900">Partner Request Portal</h1>
             </div>
-            <div className="text-sm text-gray-500 flex items-center">
-              <User className="mr-2 w-4 h-4" />
-              <span>Current User</span>
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-500 flex items-center">
+                <User className="mr-2 w-4 h-4" />
+                <span>Current User</span>
+              </div>
+              <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-900 flex items-center">
+                <Settings className="mr-1 w-4 h-4" />
+                Admin
+              </Link>
             </div>
           </div>
         </div>
@@ -61,6 +88,7 @@ export default function PartnerPortal() {
           ref={partnerLookupRef}
           onPartnerFound={handlePartnerFound}
           onPartnerNotFound={handlePartnerNotFound}
+          initialPartnerId={initialPartnerId}
         />
 
         {/* Partner Info */}
