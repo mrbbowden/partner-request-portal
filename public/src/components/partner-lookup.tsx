@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import type { Partner } from "@shared/schema";
 
 interface PartnerLookupProps {
@@ -57,22 +58,27 @@ const PartnerLookup = forwardRef<PartnerLookupRef, PartnerLookupProps>(
     onPartnerNotFound();
   };
 
-  const handleBlur = () => {
+  const handleGoClick = () => {
     if (partnerId.length === 4 && /^\d{4}$/.test(partnerId)) {
       setShouldLookup(true);
-    } else if (partnerId.length > 0) {
-      // Show error for invalid format
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleGoClick();
     }
   };
 
   const showError = error && partnerId.length === 4;
   const showFormatError = partnerId.length > 0 && partnerId.length < 4;
+  const isGoButtonDisabled = partnerId.length !== 4 || isLoading;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-2">Partner Lookup</h2>
-        <p className="text-sm text-gray-600">Enter your 4-digit Partner ID to begin your request</p>
+        <p className="text-sm text-gray-600">Enter your 4-digit Partner ID and click Go to begin your request</p>
       </div>
 
       <div className="space-y-4">
@@ -80,26 +86,43 @@ const PartnerLookup = forwardRef<PartnerLookupRef, PartnerLookupProps>(
           <Label htmlFor="partnerId" className="block text-sm font-medium text-gray-700 mb-2">
             Partner ID <span className="text-red-500">*</span>
           </Label>
-          <div className="relative">
-            <Input
-              id="partnerId"
-              type="text"
-              maxLength={4}
-              placeholder="0000"
-              value={partnerId}
-              onChange={(e) => handleInputChange(e.target.value)}
-              onBlur={handleBlur}
-              className="w-full sm:w-64 text-center text-lg font-mono tracking-wider"
-              data-testid="input-partner-id"
-            />
-            {isLoading && (
-              <div className="absolute right-3 top-2.5">
-                <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
-              </div>
-            )}
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                id="partnerId"
+                type="text"
+                maxLength={4}
+                placeholder="0000"
+                value={partnerId}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="w-full text-center text-lg font-mono tracking-wider"
+                data-testid="input-partner-id"
+              />
+              {isLoading && (
+                <div className="absolute right-3 top-2.5">
+                  <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                </div>
+              )}
+            </div>
+            <Button
+              onClick={handleGoClick}
+              disabled={isGoButtonDisabled}
+              className="px-6"
+              data-testid="go-button"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Checking...
+                </>
+              ) : (
+                "Go"
+              )}
+            </Button>
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            ID will be validated when you move to the next field
+            Enter your 4-digit Partner ID and click Go to validate
           </p>
         </div>
 
