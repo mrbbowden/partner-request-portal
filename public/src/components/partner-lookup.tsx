@@ -40,11 +40,20 @@ const PartnerLookup = forwardRef<PartnerLookupRef, PartnerLookupProps>(
       if (partner) {
         onPartnerFound(partner);
       } else if (error) {
+        // Clear any previous partner info when lookup fails
         onPartnerNotFound();
       }
       setShouldLookup(false);
     }
   }, [partner, error, shouldLookup, onPartnerFound, onPartnerNotFound]);
+
+  // Clear partner info when partnerId changes (user starts typing new ID)
+  useEffect(() => {
+    if (partnerId.length > 0 && partnerId.length < 4) {
+      // Clear partner info when user is typing a new ID
+      onPartnerNotFound();
+    }
+  }, [partnerId, onPartnerNotFound]);
 
   // Handle Enter key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -66,6 +75,8 @@ const PartnerLookup = forwardRef<PartnerLookupRef, PartnerLookupProps>(
     clearPartnerId: () => {
       setPartnerId("");
       setShouldLookup(false);
+      // Clear partner info when clearing the input
+      onPartnerNotFound();
     },
   }));
 
