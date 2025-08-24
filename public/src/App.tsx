@@ -7,6 +7,7 @@ import AdminPage from "./pages/admin";
 // Define partner type
 interface Partner {
   id: string;
+  partnerName: string; // Added partner name
   referringCaseManager: string;
   caseManagerEmail: string;
   caseManagerPhone: string;
@@ -15,6 +16,7 @@ interface Partner {
 // Define request type to match API schema
 interface Request {
   partnerId: string;
+  partnerName: string; // Added partner name
   referringCaseManager: string;
   caseManagerEmail: string;
   caseManagerPhone: string;
@@ -84,6 +86,7 @@ function RequestForm({ partner, onRequestSubmitted, onClearForm }: {
     try {
       const request: Request = {
         partnerId: partner.id,
+        partnerName: partner.partnerName, // Added partnerName
         referringCaseManager: partner.referringCaseManager,
         caseManagerEmail: partner.caseManagerEmail,
         caseManagerPhone: partner.caseManagerPhone,
@@ -438,6 +441,7 @@ function HomePage() {
           backgroundColor: 'lightgreen'
         }}>
           <h3 style={{ color: 'black' }}>Partner Found!</h3>
+          <p style={{ color: 'black' }}><strong>Partner Name:</strong> {partner.partnerName}</p>
           <p style={{ color: 'black' }}><strong>Referring Case Manager:</strong> {partner.referringCaseManager}</p>
           <p style={{ color: 'black' }}><strong>Case Manager's Email:</strong> {partner.caseManagerEmail}</p>
           <p style={{ color: 'black' }}><strong>Case Manager's Phone:</strong> {partner.caseManagerPhone}</p>

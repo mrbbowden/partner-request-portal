@@ -1,171 +1,119 @@
-import { z } from 'zod';
-import { insertRequestSchema } from '../schema';
-import { initializeStorage } from '../storage';
+import { drizzle } from "drizzle-orm/d1";
+import { requests, partners } from "../schema";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 
-export async function onRequest(context: any) {
-  const { request, env } = context;
-  
-  if (request.method !== 'POST') {
-    return new Response(
-      JSON.stringify({ message: "Method not allowed" }), 
-      { status: 405, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+const insertRequestSchema = z.object({
+  partnerId: z.string().length(4),
+  partnerName: z.string().min(1, "Partner Name is required"), // Added partner name
+  referringCaseManager: z.string().min(1, "Referring Case Manager is required"),
+  caseManagerEmail: z.string().email("Invalid email format"),
+  caseManagerPhone: z.string().min(1, "Case Manager's Phone is required"),
+  preferredContact: z.string().min(1, "Preferred Contact is required"),
+  requestType: z.string().min(1, "Request Type is required"),
+  urgency: z.string().min(1, "Urgency is required"),
+  description: z.string().min(1, "Description is required"),
+});
+
+async function sendToZapier(data: any) {
+  const webhookUrl = "https://hooks.zapier.com/hooks/catch/1234567890/abcdef123/";
   
   try {
-    // Parse and validate request body
-    const body = await request.json();
-    const validatedRequest = insertRequestSchema.parse(body);
-    
-    // Check if database is available
-    if (!env.DB) {
-      console.log('No database available, using in-memory storage');
-      const { MemStorage } = await import('../storage');
-      const memStorage = new MemStorage();
-      
-      // Verify partner exists
-      const partner = await memStorage.getPartner(validatedRequest.partnerId);
-      if (!partner) {
-        return new Response(
-          JSON.stringify({ message: "Invalid partner ID" }), 
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        partnerId: data.partnerId,
+        partnerName: data.partnerName, // Added partner name
+        referringCaseManager: data.referringCaseManager,
+        caseManagerEmail: data.caseManagerEmail,
+        caseManagerPhone: data.caseManagerPhone,
+        preferredContact: data.preferredContact,
+        requestType: data.requestType,
+        urgency: data.urgency,
+        description: data.description,
+        timestamp: new Date().toISOString(),
+      }),
+    });
 
-      const newRequest = await memStorage.createRequest(validatedRequest);
-      await sendToZapier(newRequest, partner, env);
-
-      return new Response(
-        JSON.stringify(newRequest), 
-        { status: 201, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Use D1 database
-    try {
-      // Verify partner exists
-      const partnerResult = await env.DB.prepare('SELECT * FROM partners WHERE id = ?').bind(validatedRequest.partnerId).first();
-      if (!partnerResult) {
-        return new Response(
-          JSON.stringify({ message: "Invalid partner ID" }), 
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Create request
-      const requestId = crypto.randomUUID();
-      await env.DB.prepare(`
-        INSERT INTO requests (id, partner_id, referring_case_manager, case_manager_email, case_manager_phone, preferred_contact, request_type, urgency, description, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        requestId,
-        validatedRequest.partnerId,
-        validatedRequest.referringCaseManager,
-        validatedRequest.caseManagerEmail,
-        validatedRequest.caseManagerPhone,
-        validatedRequest.preferredContact,
-        validatedRequest.requestType,
-        validatedRequest.urgency,
-        validatedRequest.description,
-        new Date().toISOString()
-      ).run();
-
-      const newRequest = {
-        ...validatedRequest,
-        id: requestId,
-        createdAt: new Date(),
-      };
-
-      await sendToZapier(newRequest, partnerResult, env);
-
-      return new Response(
-        JSON.stringify(newRequest), 
-        { status: 201, headers: { 'Content-Type': 'application/json' } }
-      );
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      // Fall back to in-memory storage if database fails
-      const { MemStorage } = await import('../storage');
-      const memStorage = new MemStorage();
-      
-      const partner = await memStorage.getPartner(validatedRequest.partnerId);
-      if (!partner) {
-        return new Response(
-          JSON.stringify({ message: "Invalid partner ID" }), 
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      const newRequest = await memStorage.createRequest(validatedRequest);
-      await sendToZapier(newRequest, partner, env);
-
-      return new Response(
-        JSON.stringify(newRequest), 
-        { status: 201, headers: { 'Content-Type': 'application/json' } }
-      );
+    if (!response.ok) {
+      console.error("Zapier webhook failed:", response.status, response.statusText);
     }
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(
-        JSON.stringify({ 
-          message: "Validation error", 
-          errors: error.errors 
-        }), 
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-    return new Response(
-      JSON.stringify({ message: "Internal server error" }), 
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    console.error("Error sending to Zapier:", error);
   }
 }
 
-// Function to send data to Zapier webhook
-async function sendToZapier(request: any, partner: any, env: any) {
-  const zapierWebhookUrl = env.ZAPIER_WEBHOOK_URL;
-  
-  if (!zapierWebhookUrl) {
-    console.log("No Zapier webhook URL configured");
-    return;
+export async function onRequest(context: any) {
+  const { request, env } = context;
+
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   try {
-    const webhookData = {
-      // Request data
-      requestId: request.id,
-      requestType: request.requestType,
-      urgency: request.urgency,
-      description: request.description,
-      preferredContact: request.preferredContact,
-      submittedAt: request.createdAt,
-      
-      // Partner data
-      partnerId: partner.id,
-      partnerName: partner.referringCaseManager,
-      partnerEmail: partner.caseManagerEmail,
-      partnerPhone: partner.caseManagerPhone,
-      
-      // Additional metadata
-      source: "Partner Request Portal",
-      timestamp: new Date().toISOString()
-    };
+    const body = await request.json();
+    const validatedData = insertRequestSchema.parse(body);
 
-    const response = await fetch(zapierWebhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
+    // Verify partner exists
+    const db = drizzle(env.DB);
+    const partner = await db.select().from(partners).where(eq(partners.id, validatedData.partnerId)).limit(1);
+
+    if (partner.length === 0) {
+      return new Response(JSON.stringify({ error: "Partner not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Insert request
+    const result = await db.insert(requests).values({
+      partnerId: validatedData.partnerId,
+      partnerName: validatedData.partnerName, // Added partner name
+      referringCaseManager: validatedData.referringCaseManager,
+      caseManagerEmail: validatedData.caseManagerEmail,
+      caseManagerPhone: validatedData.caseManagerPhone,
+      preferredContact: validatedData.preferredContact,
+      requestType: validatedData.requestType,
+      urgency: validatedData.urgency,
+      description: validatedData.description,
+    }).returning();
+
+    // Send to Zapier (non-blocking)
+    sendToZapier({
+      ...validatedData,
+      partner: {
+        id: partner[0].id,
+        partnerName: partner[0].partnerName, // Added partner name
+        referringCaseManager: partner[0].referringCaseManager,
+        caseManagerEmail: partner[0].caseManagerEmail,
+        caseManagerPhone: partner[0].caseManagerPhone,
       },
-      body: JSON.stringify(webhookData)
     });
 
-    if (response.ok) {
-      console.log("Successfully sent to Zapier:", response.status);
-    } else {
-      console.error("Failed to send to Zapier:", response.status);
-    }
+    return new Response(JSON.stringify({ 
+      message: "Request submitted successfully",
+      requestId: result[0].id 
+    }), {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error("Failed to send to Zapier:", error);
-    // Don't throw error - we don't want to break form submission if Zapier fails
+    if (error instanceof z.ZodError) {
+      return new Response(JSON.stringify({ error: "Validation error", details: error.errors }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    console.error("Database error:", error);
+    return new Response(JSON.stringify({ error: "Database not available" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

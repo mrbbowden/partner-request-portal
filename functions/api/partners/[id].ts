@@ -1,85 +1,40 @@
-import { initializeStorage } from '../../storage';
+import { drizzle } from "drizzle-orm/d1";
+import { partners } from "../../schema";
+import { eq } from "drizzle-orm";
 
 export async function onRequest(context: any) {
-  const { params, env } = context;
-  const partnerId = params.id;
-  
+  const { params } = context;
+  const { id } = params;
+
   try {
-    // Validate partner ID format (4 digits)
-    if (!/^\d{4}$/.test(partnerId)) {
-      return new Response(
-        JSON.stringify({ message: "Partner ID must be exactly 4 digits" }), 
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+    const db = drizzle(context.env.DB);
+    const result = await db.select().from(partners).where(eq(partners.id, id)).limit(1);
+
+    if (result.length === 0) {
+      return new Response(JSON.stringify({ error: "Partner not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    // Check if database is available
-    if (!env.DB) {
-      console.log('No database available, using in-memory storage');
-      const { MemStorage } = await import('../../storage');
-      const memStorage = new MemStorage();
-      const partner = await memStorage.getPartner(partnerId);
-      
-      if (!partner) {
-        return new Response(
-          JSON.stringify({ message: "Partner ID not found. Please check your ID and try again." }), 
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify(partner), 
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Use D1 database
-    try {
-      const result = await env.DB.prepare('SELECT * FROM partners WHERE id = ?').bind(partnerId).first();
-      
-      if (!result) {
-        return new Response(
-          JSON.stringify({ message: "Partner ID not found. Please check your ID and try again." }), 
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      // Transform the data to match the expected schema
-      const transformedResult = {
-        id: result.id,
-        referringCaseManager: result.referring_case_manager,
-        caseManagerEmail: result.case_manager_email,
-        caseManagerPhone: result.case_manager_phone,
-      };
-
-      return new Response(
-        JSON.stringify(transformedResult), 
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      // Fall back to in-memory storage if database fails
-      const { MemStorage } = await import('../../storage');
-      const memStorage = new MemStorage();
-      const partner = await memStorage.getPartner(partnerId);
-      
-      if (!partner) {
-        return new Response(
-          JSON.stringify({ message: "Partner ID not found. Please check your ID and try again." }), 
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-
-      return new Response(
-        JSON.stringify(partner), 
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-    }
+    const partner = result[0];
+    
+    // Transform the database result to match frontend expectations
+    return new Response(JSON.stringify({
+      id: partner.id,
+      partnerName: partner.partnerName, // Added partner name
+      referringCaseManager: partner.referringCaseManager,
+      caseManagerEmail: partner.caseManagerEmail,
+      caseManagerPhone: partner.caseManagerPhone,
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error('Error in partner lookup:', error);
-    return new Response(
-      JSON.stringify({ message: "Internal server error", error: error.message }), 
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    console.error("Database error:", error);
+    return new Response(JSON.stringify({ error: "Database not available" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

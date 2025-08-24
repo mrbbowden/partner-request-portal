@@ -1,198 +1,130 @@
-import { z } from 'zod';
+import { drizzle } from "drizzle-orm/d1";
+import { requests } from "../../../schema";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
 
 const requestUpdateSchema = z.object({
-  partner_id: z.string().length(4, "Partner ID must be exactly 4 characters"),
-  referring_case_manager: z.string().min(1, "Referring Case Manager is required"),
-  case_manager_email: z.string().email("Invalid email format"),
-  case_manager_phone: z.string().min(1, "Case Manager's Phone is required"),
-  preferred_contact: z.enum(["email", "phone"], { message: "Preferred contact must be email or phone" }),
-  request_type: z.enum(["technical", "billing", "account", "other"], { message: "Invalid request type" }),
-  urgency: z.enum(["low", "medium", "high", "urgent"], { message: "Invalid urgency level" }),
+  partnerName: z.string().min(1, "Partner Name is required"), // Added partner name
+  referringCaseManager: z.string().min(1, "Referring Case Manager is required"),
+  caseManagerEmail: z.string().email("Invalid email format"),
+  caseManagerPhone: z.string().min(1, "Case Manager's Phone is required"),
+  preferredContact: z.string().min(1, "Preferred Contact is required"),
+  requestType: z.string().min(1, "Request Type is required"),
+  urgency: z.string().min(1, "Urgency is required"),
   description: z.string().min(1, "Description is required"),
 });
 
-const adminPassword = "scooby";
-
-function checkAuth(request: Request): boolean {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return false;
-  }
-  const token = authHeader.substring(7);
-  return token === adminPassword;
-}
-
 export async function onRequest(context: any) {
-  const { request, env, params } = context;
-  const requestId = params.id;
+  const { request, params, env } = context;
+  const { id } = params;
 
-  // Check authentication
-  if (!checkAuth(request)) {
-    return new Response(JSON.stringify({ message: "Unauthorized" }), {
+  // Check admin password
+  const authHeader = request.headers.get("Authorization");
+  if (authHeader !== "Bearer scooby") {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  try {
-    switch (request.method) {
-      case "GET":
-        return await handleGetRequest(requestId, env);
-      case "PUT":
-        return await handleUpdateRequest(requestId, request, env);
-      case "DELETE":
-        return await handleDeleteRequest(requestId, env);
-      default:
-        return new Response(JSON.stringify({ message: "Method not allowed" }), {
-          status: 405,
+  if (request.method === "GET") {
+    try {
+      const db = drizzle(env.DB);
+      const result = await db.select().from(requests).where(eq(requests.id, id)).limit(1);
+
+      if (result.length === 0) {
+        return new Response(JSON.stringify({ error: "Request not found" }), {
+          status: 404,
           headers: { "Content-Type": "application/json" },
         });
-    }
-  } catch (error) {
-    console.error("Error in admin request detail API:", error);
-    return new Response(JSON.stringify({ message: "Internal server error", error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-}
+      }
 
-async function handleGetRequest(requestId: string, env: any) {
-  if (!env.DB) {
-    return new Response(JSON.stringify({ message: "Database not available" }), {
-      status: 503,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  try {
-    const result = await env.DB.prepare(`
-      SELECT r.*, p.referring_case_manager as partner_name 
-      FROM requests r 
-      LEFT JOIN partners p ON r.partner_id = p.id 
-      WHERE r.id = ?
-    `).bind(requestId).first();
-    
-    if (!result) {
-      return new Response(JSON.stringify({ message: "Request not found" }), {
-        status: 404,
+      return new Response(JSON.stringify(result[0]), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Database error:", error);
+      return new Response(JSON.stringify({ error: "Database not available" }), {
+        status: 500,
         headers: { "Content-Type": "application/json" },
       });
     }
-    return new Response(JSON.stringify(result), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("Database error:", error);
-    return new Response(JSON.stringify({ message: "Database error", error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-}
-
-async function handleUpdateRequest(requestId: string, request: Request, env: any) {
-  if (!env.DB) {
-    return new Response(JSON.stringify({ message: "Database not available" }), {
-      status: 503,
-      headers: { "Content-Type": "application/json" },
-    });
   }
 
-  try {
-    const body = await request.json();
-    const validatedRequest = requestUpdateSchema.parse(body);
+  if (request.method === "PUT") {
+    try {
+      const body = await request.json();
+      const validatedData = requestUpdateSchema.parse(body);
 
-    // Check if request exists
-    const existingRequest = await env.DB.prepare("SELECT id FROM requests WHERE id = ?").bind(requestId).first();
-    if (!existingRequest) {
-      return new Response(JSON.stringify({ message: "Request not found" }), {
-        status: 404,
+      const db = drizzle(env.DB);
+      const result = await db
+        .update(requests)
+        .set({
+          partnerName: validatedData.partnerName, // Added partner name
+          referringCaseManager: validatedData.referringCaseManager,
+          caseManagerEmail: validatedData.caseManagerEmail,
+          caseManagerPhone: validatedData.caseManagerPhone,
+          preferredContact: validatedData.preferredContact,
+          requestType: validatedData.requestType,
+          urgency: validatedData.urgency,
+          description: validatedData.description,
+        })
+        .where(eq(requests.id, id))
+        .returning();
+
+      if (result.length === 0) {
+        return new Response(JSON.stringify({ error: "Request not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify(result[0]), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return new Response(JSON.stringify({ error: "Validation error", details: error.errors }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      console.error("Database error:", error);
+      return new Response(JSON.stringify({ error: "Database not available" }), {
+        status: 500,
         headers: { "Content-Type": "application/json" },
       });
     }
+  }
 
-    // Check if partner exists
-    const partner = await env.DB.prepare("SELECT id FROM partners WHERE id = ?").bind(validatedRequest.partner_id).first();
-    if (!partner) {
-      return new Response(JSON.stringify({ message: "Partner not found" }), {
-        status: 404,
+  if (request.method === "DELETE") {
+    try {
+      const db = drizzle(env.DB);
+      const result = await db.delete(requests).where(eq(requests.id, id)).returning();
+
+      if (result.length === 0) {
+        return new Response(JSON.stringify({ error: "Request not found" }), {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ message: "Request deleted successfully" }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (error) {
+      console.error("Database error:", error);
+      return new Response(JSON.stringify({ error: "Database not available" }), {
+        status: 500,
         headers: { "Content-Type": "application/json" },
       });
     }
-
-    // Update request
-    await env.DB.prepare(`
-      UPDATE requests 
-      SET partner_id = ?, referring_case_manager = ?, case_manager_email = ?, case_manager_phone = ?, preferred_contact = ?, request_type = ?, urgency = ?, description = ? 
-      WHERE id = ?
-    `).bind(
-      validatedRequest.partner_id,
-      validatedRequest.referring_case_manager,
-      validatedRequest.case_manager_email,
-      validatedRequest.case_manager_phone,
-      validatedRequest.preferred_contact,
-      validatedRequest.request_type,
-      validatedRequest.urgency,
-      validatedRequest.description,
-      requestId
-    ).run();
-
-    const updatedRequest = {
-      id: requestId,
-      ...validatedRequest,
-    };
-
-    return new Response(JSON.stringify(updatedRequest), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ message: "Validation error", errors: error.errors }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-    console.error("Database error:", error);
-    return new Response(JSON.stringify({ message: "Database error", error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-}
-
-async function handleDeleteRequest(requestId: string, env: any) {
-  if (!env.DB) {
-    return new Response(JSON.stringify({ message: "Database not available" }), {
-      status: 503,
-      headers: { "Content-Type": "application/json" },
-    });
   }
 
-  try {
-    // Check if request exists
-    const existingRequest = await env.DB.prepare("SELECT id FROM requests WHERE id = ?").bind(requestId).first();
-    if (!existingRequest) {
-      return new Response(JSON.stringify({ message: "Request not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    // Delete request
-    await env.DB.prepare("DELETE FROM requests WHERE id = ?").bind(requestId).run();
-
-    return new Response(JSON.stringify({ message: "Request deleted successfully" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("Database error:", error);
-    return new Response(JSON.stringify({ message: "Database error", error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  return new Response(JSON.stringify({ error: "Method not allowed" }), {
+    status: 405,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 
