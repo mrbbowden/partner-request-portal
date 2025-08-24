@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const partnerSchema = z.object({
   id: z.string().length(4, "Partner ID must be exactly 4 characters"),
-  full_name: z.string().min(1, "Full name is required"),
+  referring_case_manager: z.string().min(1, "Referring Case Manager is required"),
   email: z.string().email("Invalid email format"),
   phone: z.string().min(1, "Phone number is required"),
 });
@@ -95,8 +95,8 @@ async function handleCreatePartner(request: Request, env: any) {
 
     // Insert new partner
     await env.DB.prepare(
-      "INSERT INTO partners (id, full_name, email, phone) VALUES (?, ?, ?, ?)"
-    ).bind(validatedPartner.id, validatedPartner.full_name, validatedPartner.email, validatedPartner.phone).run();
+      "INSERT INTO partners (id, referring_case_manager, email, phone) VALUES (?, ?, ?, ?)"
+    ).bind(validatedPartner.id, validatedPartner.referring_case_manager, validatedPartner.email, validatedPartner.phone).run();
 
     return new Response(JSON.stringify(validatedPartner), {
       status: 201,

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const requestUpdateSchema = z.object({
   partner_id: z.string().length(4, "Partner ID must be exactly 4 characters"),
-  full_name: z.string().min(1, "Full name is required"),
+  referring_case_manager: z.string().min(1, "Referring Case Manager is required"),
   email: z.string().email("Invalid email format"),
   phone: z.string().min(1, "Phone number is required"),
   preferred_contact: z.enum(["email", "phone"], { message: "Preferred contact must be email or phone" }),
@@ -67,7 +67,7 @@ async function handleGetRequest(requestId: string, env: any) {
 
   try {
     const result = await env.DB.prepare(`
-      SELECT r.*, p.full_name as partner_name 
+      SELECT r.*, p.referring_case_manager as partner_name 
       FROM requests r 
       LEFT JOIN partners p ON r.partner_id = p.id 
       WHERE r.id = ?
@@ -124,11 +124,11 @@ async function handleUpdateRequest(requestId: string, request: Request, env: any
     // Update request
     await env.DB.prepare(`
       UPDATE requests 
-      SET partner_id = ?, full_name = ?, email = ?, phone = ?, preferred_contact = ?, request_type = ?, urgency = ?, description = ? 
+      SET partner_id = ?, referring_case_manager = ?, email = ?, phone = ?, preferred_contact = ?, request_type = ?, urgency = ?, description = ? 
       WHERE id = ?
     `).bind(
       validatedRequest.partner_id,
-      validatedRequest.full_name,
+      validatedRequest.referring_case_manager,
       validatedRequest.email,
       validatedRequest.phone,
       validatedRequest.preferred_contact,

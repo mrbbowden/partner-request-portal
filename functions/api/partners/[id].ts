@@ -47,7 +47,7 @@ export async function onRequest(context: any) {
       // Transform the data to match the expected schema
       const transformedResult = {
         id: result.id,
-        fullName: result.full_name,
+        referringCaseManager: result.referring_case_manager,
         email: result.email,
         phone: result.phone,
       };

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const requestSchema = z.object({
   partner_id: z.string().length(4, "Partner ID must be exactly 4 characters"),
-  full_name: z.string().min(1, "Full name is required"),
+  referring_case_manager: z.string().min(1, "Referring Case Manager is required"),
   email: z.string().email("Invalid email format"),
   phone: z.string().min(1, "Phone number is required"),
   preferred_contact: z.enum(["email", "phone"], { message: "Preferred contact must be email or phone" }),
@@ -64,7 +64,7 @@ async function handleGetRequests(env: any) {
 
   try {
     const result = await env.DB.prepare(`
-      SELECT r.*, p.full_name as partner_name 
+      SELECT r.*, p.referring_case_manager as partner_name 
       FROM requests r 
       LEFT JOIN partners p ON r.partner_id = p.id 
       ORDER BY r.created_at DESC
@@ -105,12 +105,12 @@ async function handleCreateRequest(request: Request, env: any) {
     // Insert new request
     const requestId = crypto.randomUUID();
     await env.DB.prepare(`
-      INSERT INTO requests (id, partner_id, full_name, email, phone, preferred_contact, request_type, urgency, description, created_at) 
+      INSERT INTO requests (id, partner_id, referring_case_manager, email, phone, preferred_contact, request_type, urgency, description, created_at) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       requestId,
       validatedRequest.partner_id,
-      validatedRequest.full_name,
+      validatedRequest.referring_case_manager,
       validatedRequest.email,
       validatedRequest.phone,
       validatedRequest.preferred_contact,

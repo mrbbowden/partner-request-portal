@@ -5,7 +5,7 @@ import { z } from "zod";
 
 export const partners = pgTable("partners", {
   id: varchar("id", { length: 4 }).primaryKey(),
-  fullName: text("full_name").notNull(),
+  referringCaseManager: text("referring_case_manager").notNull(),
   email: text("email").notNull(),
   phone: text("phone").notNull(),
 });
@@ -13,7 +13,7 @@ export const partners = pgTable("partners", {
 export const requests = pgTable("requests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   partnerId: varchar("partner_id", { length: 4 }).notNull().references(() => partners.id),
-  fullName: text("full_name").notNull(),
+  referringCaseManager: text("referring_case_manager").notNull(),
   email: text("email").notNull(),
   phone: text("phone").notNull(),
   preferredContact: text("preferred_contact").notNull(),

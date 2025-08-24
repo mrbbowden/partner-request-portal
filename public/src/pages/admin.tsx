@@ -17,7 +17,7 @@ import { Link } from "wouter";
 
 interface Partner {
   id: string;
-  full_name: string;
+  referring_case_manager: string;
   email: string;
   phone: string;
 }
@@ -25,7 +25,7 @@ interface Partner {
 interface Request {
   id: string;
   partner_id: string;
-  full_name: string;
+  referring_case_manager: string;
   email: string;
   phone: string;
   preferred_contact: string;
@@ -37,14 +37,14 @@ interface Request {
 
 interface PartnerFormData {
   id: string;
-  full_name: string;
+  referring_case_manager: string;
   email: string;
   phone: string;
 }
 
 interface RequestFormData {
   partner_id: string;
-  full_name: string;
+  referring_case_manager: string;
   email: string;
   phone: string;
   preferred_contact: string;
@@ -63,13 +63,13 @@ const AdminPage: React.FC = () => {
   const [showRequestDialog, setShowRequestDialog] = useState(false);
   const [partnerForm, setPartnerForm] = useState<PartnerFormData>({
     id: "",
-    full_name: "",
+    referring_case_manager: "",
     email: "",
     phone: "",
   });
   const [requestForm, setRequestForm] = useState<RequestFormData>({
     partner_id: "",
-    full_name: "",
+    referring_case_manager: "",
     email: "",
     phone: "",
     preferred_contact: "",
@@ -153,7 +153,7 @@ const AdminPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-partners", password] });
       toast({ title: "Success", description: "Partner created successfully" });
       setShowPartnerDialog(false);
-      setPartnerForm({ id: "", full_name: "", email: "", phone: "" });
+      setPartnerForm({ id: "", referring_case_manager: "", email: "", phone: "" });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -178,7 +178,7 @@ const AdminPage: React.FC = () => {
       toast({ title: "Success", description: "Partner updated successfully" });
       setShowPartnerDialog(false);
       setEditingPartner(null);
-      setPartnerForm({ id: "", full_name: "", email: "", phone: "" });
+      setPartnerForm({ id: "", referring_case_manager: "", email: "", phone: "" });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -225,7 +225,7 @@ const AdminPage: React.FC = () => {
       setShowRequestDialog(false);
       setRequestForm({
         partner_id: "",
-        full_name: "",
+        referring_case_manager: "",
         email: "",
         phone: "",
         preferred_contact: "",
@@ -259,7 +259,7 @@ const AdminPage: React.FC = () => {
       setEditingRequest(null);
       setRequestForm({
         partner_id: "",
-        full_name: "",
+        referring_case_manager: "",
         email: "",
         phone: "",
         preferred_contact: "",
@@ -321,7 +321,7 @@ const AdminPage: React.FC = () => {
       setEditingPartner(partner);
       setPartnerForm({
         id: partner.id,
-        full_name: partner.full_name,
+        referring_case_manager: partner.referring_case_manager,
         email: partner.email,
         phone: partner.phone,
       });
@@ -337,7 +337,7 @@ const AdminPage: React.FC = () => {
       setEditingRequest(request);
       setRequestForm({
         partner_id: request.partner_id,
-        full_name: request.full_name,
+        referring_case_manager: request.referring_case_manager,
         email: request.email,
         phone: request.phone,
         preferred_contact: request.preferred_contact,
@@ -470,11 +470,11 @@ const AdminPage: React.FC = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="partner-name">Full Name</Label>
+                          <Label htmlFor="partner-name">Referring Case Manager</Label>
                           <Input
                             id="partner-name"
-                            value={partnerForm.full_name}
-                            onChange={(e) => setPartnerForm({ ...partnerForm, full_name: e.target.value })}
+                            value={partnerForm.referring_case_manager}
+                            onChange={(e) => setPartnerForm({ ...partnerForm, referring_case_manager: e.target.value })}
                             placeholder="John Doe"
                           />
                         </div>
@@ -523,7 +523,7 @@ const AdminPage: React.FC = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>ID</TableHead>
-                        <TableHead>Name</TableHead>
+                        <TableHead>Referring Case Manager</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Phone</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
@@ -533,7 +533,7 @@ const AdminPage: React.FC = () => {
                       {partners.map((partner: Partner) => (
                         <TableRow key={partner.id}>
                           <TableCell className="font-mono">{partner.id}</TableCell>
-                          <TableCell>{partner.full_name}</TableCell>
+                          <TableCell>{partner.referring_case_manager}</TableCell>
                           <TableCell>{partner.email}</TableCell>
                           <TableCell>{partner.phone}</TableCell>
                           <TableCell className="text-right">
@@ -619,7 +619,7 @@ const AdminPage: React.FC = () => {
                             <SelectContent>
                               {partners.map((partner: Partner) => (
                                 <SelectItem key={partner.id} value={partner.id}>
-                                  {partner.id} - {partner.full_name}
+                                  {partner.id} - {partner.referring_case_manager}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -627,11 +627,11 @@ const AdminPage: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="request-name">Full Name</Label>
+                            <Label htmlFor="request-name">Referring Case Manager</Label>
                             <Input
                               id="request-name"
-                              value={requestForm.full_name}
-                              onChange={(e) => setRequestForm({ ...requestForm, full_name: e.target.value })}
+                              value={requestForm.referring_case_manager}
+                              onChange={(e) => setRequestForm({ ...requestForm, referring_case_manager: e.target.value })}
                               placeholder="John Doe"
                             />
                           </div>
@@ -745,7 +745,7 @@ const AdminPage: React.FC = () => {
                       <TableRow>
                         <TableHead>ID</TableHead>
                         <TableHead>Partner</TableHead>
-                        <TableHead>Name</TableHead>
+                        <TableHead>Referring Case Manager</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Urgency</TableHead>
                         <TableHead>Created</TableHead>
@@ -757,7 +757,7 @@ const AdminPage: React.FC = () => {
                         <TableRow key={request.id}>
                           <TableCell className="font-mono text-xs">{request.id.slice(0, 8)}...</TableCell>
                           <TableCell className="font-mono">{request.partner_id}</TableCell>
-                          <TableCell>{request.full_name}</TableCell>
+                          <TableCell>{request.referring_case_manager}</TableCell>
                           <TableCell>
                             <Badge variant="outline">{request.request_type}</Badge>
                           </TableCell>
