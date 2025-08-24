@@ -3,8 +3,8 @@ import { z } from 'zod';
 const requestUpdateSchema = z.object({
   partner_id: z.string().length(4, "Partner ID must be exactly 4 characters"),
   referring_case_manager: z.string().min(1, "Referring Case Manager is required"),
-  email: z.string().email("Invalid email format"),
-  phone: z.string().min(1, "Phone number is required"),
+  case_manager_email: z.string().email("Invalid email format"),
+  case_manager_phone: z.string().min(1, "Case Manager's Phone is required"),
   preferred_contact: z.enum(["email", "phone"], { message: "Preferred contact must be email or phone" }),
   request_type: z.enum(["technical", "billing", "account", "other"], { message: "Invalid request type" }),
   urgency: z.enum(["low", "medium", "high", "urgent"], { message: "Invalid urgency level" }),
@@ -124,13 +124,13 @@ async function handleUpdateRequest(requestId: string, request: Request, env: any
     // Update request
     await env.DB.prepare(`
       UPDATE requests 
-      SET partner_id = ?, referring_case_manager = ?, email = ?, phone = ?, preferred_contact = ?, request_type = ?, urgency = ?, description = ? 
+      SET partner_id = ?, referring_case_manager = ?, case_manager_email = ?, case_manager_phone = ?, preferred_contact = ?, request_type = ?, urgency = ?, description = ? 
       WHERE id = ?
     `).bind(
       validatedRequest.partner_id,
       validatedRequest.referring_case_manager,
-      validatedRequest.email,
-      validatedRequest.phone,
+      validatedRequest.case_manager_email,
+      validatedRequest.case_manager_phone,
       validatedRequest.preferred_contact,
       validatedRequest.request_type,
       validatedRequest.urgency,

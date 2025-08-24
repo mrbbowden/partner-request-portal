@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 const partnerUpdateSchema = z.object({
   referring_case_manager: z.string().min(1, "Referring Case Manager is required"),
-  email: z.string().email("Invalid email format"),
-  phone: z.string().min(1, "Phone number is required"),
+  case_manager_email: z.string().email("Invalid email format"),
+  case_manager_phone: z.string().min(1, "Case Manager's Phone is required"),
 });
 
 const adminPassword = "scooby";
@@ -111,8 +111,8 @@ async function handleUpdatePartner(partnerId: string, request: Request, env: any
 
     // Update partner
     await env.DB.prepare(
-      "UPDATE partners SET referring_case_manager = ?, email = ?, phone = ? WHERE id = ?"
-    ).bind(validatedPartner.referring_case_manager, validatedPartner.email, validatedPartner.phone, partnerId).run();
+      "UPDATE partners SET referring_case_manager = ?, case_manager_email = ?, case_manager_phone = ? WHERE id = ?"
+    ).bind(validatedPartner.referring_case_manager, validatedPartner.case_manager_email, validatedPartner.case_manager_phone, partnerId).run();
 
     const updatedPartner = {
       id: partnerId,

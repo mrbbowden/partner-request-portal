@@ -48,8 +48,8 @@ export async function onRequest(context: any) {
       const transformedResult = {
         id: result.id,
         referringCaseManager: result.referring_case_manager,
-        email: result.email,
-        phone: result.phone,
+        caseManagerEmail: result.case_manager_email,
+        caseManagerPhone: result.case_manager_phone,
       };
 
       return new Response(

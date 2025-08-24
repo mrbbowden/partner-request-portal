@@ -18,16 +18,16 @@ import { Link } from "wouter";
 interface Partner {
   id: string;
   referring_case_manager: string;
-  email: string;
-  phone: string;
+  case_manager_email: string;
+  case_manager_phone: string;
 }
 
 interface Request {
   id: string;
   partner_id: string;
   referring_case_manager: string;
-  email: string;
-  phone: string;
+  case_manager_email: string;
+  case_manager_phone: string;
   preferred_contact: string;
   request_type: string;
   urgency: string;
@@ -38,15 +38,15 @@ interface Request {
 interface PartnerFormData {
   id: string;
   referring_case_manager: string;
-  email: string;
-  phone: string;
+  case_manager_email: string;
+  case_manager_phone: string;
 }
 
 interface RequestFormData {
   partner_id: string;
   referring_case_manager: string;
-  email: string;
-  phone: string;
+  case_manager_email: string;
+  case_manager_phone: string;
   preferred_contact: string;
   request_type: string;
   urgency: string;
@@ -64,14 +64,14 @@ const AdminPage: React.FC = () => {
   const [partnerForm, setPartnerForm] = useState<PartnerFormData>({
     id: "",
     referring_case_manager: "",
-    email: "",
-    phone: "",
+    case_manager_email: "",
+    case_manager_phone: "",
   });
   const [requestForm, setRequestForm] = useState<RequestFormData>({
     partner_id: "",
     referring_case_manager: "",
-    email: "",
-    phone: "",
+    case_manager_email: "",
+    case_manager_phone: "",
     preferred_contact: "",
     request_type: "",
     urgency: "",
@@ -153,7 +153,7 @@ const AdminPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["admin-partners", password] });
       toast({ title: "Success", description: "Partner created successfully" });
       setShowPartnerDialog(false);
-      setPartnerForm({ id: "", referring_case_manager: "", email: "", phone: "" });
+      setPartnerForm({ id: "", referring_case_manager: "", case_manager_email: "", case_manager_phone: "" });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -178,7 +178,7 @@ const AdminPage: React.FC = () => {
       toast({ title: "Success", description: "Partner updated successfully" });
       setShowPartnerDialog(false);
       setEditingPartner(null);
-      setPartnerForm({ id: "", referring_case_manager: "", email: "", phone: "" });
+      setPartnerForm({ id: "", referring_case_manager: "", case_manager_email: "", case_manager_phone: "" });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -322,8 +322,8 @@ const AdminPage: React.FC = () => {
       setPartnerForm({
         id: partner.id,
         referring_case_manager: partner.referring_case_manager,
-        email: partner.email,
-        phone: partner.phone,
+        case_manager_email: partner.case_manager_email,
+        case_manager_phone: partner.case_manager_phone,
       });
     } else {
       setEditingPartner(null);
@@ -338,8 +338,8 @@ const AdminPage: React.FC = () => {
       setRequestForm({
         partner_id: request.partner_id,
         referring_case_manager: request.referring_case_manager,
-        email: request.email,
-        phone: request.phone,
+        case_manager_email: request.case_manager_email,
+        case_manager_phone: request.case_manager_phone,
         preferred_contact: request.preferred_contact,
         request_type: request.request_type,
         urgency: request.urgency,
@@ -479,21 +479,21 @@ const AdminPage: React.FC = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="partner-email">Email</Label>
+                          <Label htmlFor="partner-email">Case Manager's Email</Label>
                           <Input
                             id="partner-email"
                             type="email"
-                            value={partnerForm.email}
-                            onChange={(e) => setPartnerForm({ ...partnerForm, email: e.target.value })}
+                            value={partnerForm.case_manager_email}
+                            onChange={(e) => setPartnerForm({ ...partnerForm, case_manager_email: e.target.value })}
                             placeholder="john@example.com"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="partner-phone">Phone</Label>
+                          <Label htmlFor="partner-phone">Case Manager's Phone</Label>
                           <Input
                             id="partner-phone"
-                            value={partnerForm.phone}
-                            onChange={(e) => setPartnerForm({ ...partnerForm, phone: e.target.value })}
+                            value={partnerForm.case_manager_phone}
+                            onChange={(e) => setPartnerForm({ ...partnerForm, case_manager_phone: e.target.value })}
                             placeholder="(555) 123-4567"
                           />
                         </div>
@@ -524,8 +524,8 @@ const AdminPage: React.FC = () => {
                       <TableRow>
                         <TableHead>ID</TableHead>
                         <TableHead>Referring Case Manager</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Phone</TableHead>
+                        <TableHead>Case Manager's Email</TableHead>
+                        <TableHead>Case Manager's Phone</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -534,8 +534,8 @@ const AdminPage: React.FC = () => {
                         <TableRow key={partner.id}>
                           <TableCell className="font-mono">{partner.id}</TableCell>
                           <TableCell>{partner.referring_case_manager}</TableCell>
-                          <TableCell>{partner.email}</TableCell>
-                          <TableCell>{partner.phone}</TableCell>
+                          <TableCell>{partner.case_manager_email}</TableCell>
+                          <TableCell>{partner.case_manager_phone}</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button
@@ -636,23 +636,23 @@ const AdminPage: React.FC = () => {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="request-email">Email</Label>
+                            <Label htmlFor="request-email">Case Manager's Email</Label>
                             <Input
                               id="request-email"
                               type="email"
-                              value={requestForm.email}
-                              onChange={(e) => setRequestForm({ ...requestForm, email: e.target.value })}
+                              value={requestForm.case_manager_email}
+                              onChange={(e) => setRequestForm({ ...requestForm, case_manager_email: e.target.value })}
                               placeholder="john@example.com"
                             />
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="request-phone">Phone</Label>
+                            <Label htmlFor="request-phone">Case Manager's Phone</Label>
                             <Input
                               id="request-phone"
-                              value={requestForm.phone}
-                              onChange={(e) => setRequestForm({ ...requestForm, phone: e.target.value })}
+                              value={requestForm.case_manager_phone}
+                              onChange={(e) => setRequestForm({ ...requestForm, case_manager_phone: e.target.value })}
                               placeholder="(555) 123-4567"
                             />
                           </div>

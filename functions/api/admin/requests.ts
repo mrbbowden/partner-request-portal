@@ -3,8 +3,8 @@ import { z } from 'zod';
 const requestSchema = z.object({
   partner_id: z.string().length(4, "Partner ID must be exactly 4 characters"),
   referring_case_manager: z.string().min(1, "Referring Case Manager is required"),
-  email: z.string().email("Invalid email format"),
-  phone: z.string().min(1, "Phone number is required"),
+  case_manager_email: z.string().email("Invalid email format"),
+  case_manager_phone: z.string().min(1, "Case Manager's Phone is required"),
   preferred_contact: z.enum(["email", "phone"], { message: "Preferred contact must be email or phone" }),
   request_type: z.enum(["technical", "billing", "account", "other"], { message: "Invalid request type" }),
   urgency: z.enum(["low", "medium", "high", "urgent"], { message: "Invalid urgency level" }),

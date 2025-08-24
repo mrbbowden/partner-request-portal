@@ -55,14 +55,14 @@ export async function onRequest(context: any) {
       // Create request
       const requestId = crypto.randomUUID();
       await env.DB.prepare(`
-        INSERT INTO requests (id, partner_id, referring_case_manager, email, phone, preferred_contact, request_type, urgency, description, created_at)
+        INSERT INTO requests (id, partner_id, referring_case_manager, case_manager_email, case_manager_phone, preferred_contact, request_type, urgency, description, created_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         requestId,
         validatedRequest.partnerId,
         validatedRequest.referringCaseManager,
-        validatedRequest.email,
-        validatedRequest.phone,
+        validatedRequest.caseManagerEmail,
+        validatedRequest.caseManagerPhone,
         validatedRequest.preferredContact,
         validatedRequest.requestType,
         validatedRequest.urgency,
@@ -143,8 +143,8 @@ async function sendToZapier(request: any, partner: any, env: any) {
       // Partner data
       partnerId: partner.id,
       partnerName: partner.referringCaseManager,
-      partnerEmail: partner.email,
-      partnerPhone: partner.phone,
+      partnerEmail: partner.caseManagerEmail,
+      partnerPhone: partner.caseManagerPhone,
       
       // Additional metadata
       source: "Partner Request Portal",
