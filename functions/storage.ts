@@ -54,18 +54,23 @@ export class D1Storage implements IStorage {
     
     try {
       await this.db.prepare(`
-        INSERT INTO requests (id, partner_id, full_name, email, phone, preferred_contact, request_type, urgency, description, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO requests (id, partner_id, partner_name, referring_case_manager, case_manager_email, case_manager_phone, preferred_contact, urgency, description, recipients_name, recipients_address, recipients_email, recipients_phone, description_of_need, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         id,
         request.partnerId,
-        request.fullName,
-        request.email,
-        request.phone,
+        request.partnerName,
+        request.referringCaseManager,
+        request.caseManagerEmail,
+        request.caseManagerPhone,
         request.preferredContact,
-        request.requestType,
         request.urgency,
         request.description,
+        request.recipientsName,
+        request.recipientsAddress,
+        request.recipientsEmail,
+        request.recipientsPhone,
+        request.descriptionOfNeed,
         request.createdAt.toISOString()
       ).run();
     } catch (error) {

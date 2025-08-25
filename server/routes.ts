@@ -86,7 +86,6 @@ async function sendToZapier(request: any, partner: any) {
     const webhookData = {
       // Request data
       requestId: request.id,
-      requestType: request.requestType,
       urgency: request.urgency,
       description: request.description,
       preferredContact: request.preferredContact,
