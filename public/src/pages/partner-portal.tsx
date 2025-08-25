@@ -4,8 +4,15 @@ import { Link } from "wouter";
 import PartnerLookup, { type PartnerLookupRef } from "@/components/partner-lookup";
 import PartnerInfo from "@/components/partner-info";
 import RequestForm from "@/components/request-form";
-import type { Partner } from "@shared/schema";
 import { getPartnerIdCookie } from "@/lib/cookies";
+
+interface Partner {
+  id: string;
+  partnerName: string;
+  referringCaseManager: string;
+  caseManagerEmail: string;
+  caseManagerPhone: string;
+}
 
 export default function PartnerPortal() {
   const [partner, setPartner] = useState<Partner | null>(null);
