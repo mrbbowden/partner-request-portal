@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const insertRequestSchema = z.object({
   partnerId: z.string().length(4),
-  partnerName: z.string().min(1, "Partner Name is required"), // Added partner name
+  partnerName: z.string().min(1, "Partner Name is required"),
   referringCaseManager: z.string().min(1, "Referring Case Manager is required"),
   caseManagerEmail: z.string().email("Invalid email format"),
   caseManagerPhone: z.string().min(1, "Case Manager's Phone is required"),
@@ -13,6 +13,12 @@ const insertRequestSchema = z.object({
   requestType: z.string().min(1, "Request Type is required"),
   urgency: z.string().min(1, "Urgency is required"),
   description: z.string().min(1, "Description is required"),
+  // New recipient fields
+  recipientsName: z.string().min(1, "Recipient's Name is required"),
+  recipientsAddress: z.string().min(1, "Recipient's Address is required"),
+  recipientsEmail: z.string().email("Invalid recipient email format"),
+  recipientsPhone: z.string().min(1, "Recipient's Phone is required"),
+  descriptionOfNeed: z.string().min(1, "Description of Need is required"),
 });
 
 async function sendToZapier(data: any) {
@@ -26,7 +32,7 @@ async function sendToZapier(data: any) {
       },
       body: JSON.stringify({
         partnerId: data.partnerId,
-        partnerName: data.partnerName, // Added partner name
+        partnerName: data.partnerName,
         referringCaseManager: data.referringCaseManager,
         caseManagerEmail: data.caseManagerEmail,
         caseManagerPhone: data.caseManagerPhone,
@@ -34,6 +40,12 @@ async function sendToZapier(data: any) {
         requestType: data.requestType,
         urgency: data.urgency,
         description: data.description,
+        // New recipient fields
+        recipientsName: data.recipientsName,
+        recipientsAddress: data.recipientsAddress,
+        recipientsEmail: data.recipientsEmail,
+        recipientsPhone: data.recipientsPhone,
+        descriptionOfNeed: data.descriptionOfNeed,
         timestamp: new Date().toISOString(),
       }),
     });
@@ -74,7 +86,7 @@ export async function onRequest(context: any) {
     // Insert request
     const result = await db.insert(requests).values({
       partnerId: validatedData.partnerId,
-      partnerName: validatedData.partnerName, // Added partner name
+      partnerName: validatedData.partnerName,
       referringCaseManager: validatedData.referringCaseManager,
       caseManagerEmail: validatedData.caseManagerEmail,
       caseManagerPhone: validatedData.caseManagerPhone,
@@ -82,6 +94,12 @@ export async function onRequest(context: any) {
       requestType: validatedData.requestType,
       urgency: validatedData.urgency,
       description: validatedData.description,
+      // New recipient fields
+      recipientsName: validatedData.recipientsName,
+      recipientsAddress: validatedData.recipientsAddress,
+      recipientsEmail: validatedData.recipientsEmail,
+      recipientsPhone: validatedData.recipientsPhone,
+      descriptionOfNeed: validatedData.descriptionOfNeed,
     }).returning();
 
     // Send to Zapier (non-blocking)
@@ -89,7 +107,7 @@ export async function onRequest(context: any) {
       ...validatedData,
       partner: {
         id: partner[0].id,
-        partnerName: partner[0].partnerName, // Added partner name
+        partnerName: partner[0].partnerName,
         referringCaseManager: partner[0].referringCaseManager,
         caseManagerEmail: partner[0].caseManagerEmail,
         caseManagerPhone: partner[0].caseManagerPhone,

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 const requestUpdateSchema = z.object({
-  partnerName: z.string().min(1, "Partner Name is required"), // Added partner name
+  partnerName: z.string().min(1, "Partner Name is required"),
   referringCaseManager: z.string().min(1, "Referring Case Manager is required"),
   caseManagerEmail: z.string().email("Invalid email format"),
   caseManagerPhone: z.string().min(1, "Case Manager's Phone is required"),
@@ -12,6 +12,12 @@ const requestUpdateSchema = z.object({
   requestType: z.string().min(1, "Request Type is required"),
   urgency: z.string().min(1, "Urgency is required"),
   description: z.string().min(1, "Description is required"),
+  // New recipient fields
+  recipientsName: z.string().min(1, "Recipient's Name is required"),
+  recipientsAddress: z.string().min(1, "Recipient's Address is required"),
+  recipientsEmail: z.string().email("Invalid recipient email format"),
+  recipientsPhone: z.string().min(1, "Recipient's Phone is required"),
+  descriptionOfNeed: z.string().min(1, "Description of Need is required"),
 });
 
 export async function onRequest(context: any) {
@@ -60,7 +66,7 @@ export async function onRequest(context: any) {
       const result = await db
         .update(requests)
         .set({
-          partnerName: validatedData.partnerName, // Added partner name
+          partnerName: validatedData.partnerName,
           referringCaseManager: validatedData.referringCaseManager,
           caseManagerEmail: validatedData.caseManagerEmail,
           caseManagerPhone: validatedData.caseManagerPhone,
@@ -68,6 +74,12 @@ export async function onRequest(context: any) {
           requestType: validatedData.requestType,
           urgency: validatedData.urgency,
           description: validatedData.description,
+          // New recipient fields
+          recipientsName: validatedData.recipientsName,
+          recipientsAddress: validatedData.recipientsAddress,
+          recipientsEmail: validatedData.recipientsEmail,
+          recipientsPhone: validatedData.recipientsPhone,
+          descriptionOfNeed: validatedData.descriptionOfNeed,
         })
         .where(eq(requests.id, id))
         .returning();

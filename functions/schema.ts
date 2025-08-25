@@ -22,6 +22,12 @@ export const requests = pgTable("requests", {
   requestType: text("request_type").notNull(),
   urgency: text("urgency").notNull(),
   description: text("description").notNull(),
+  // New recipient fields
+  recipientsName: text("recipients_name").notNull(),
+  recipientsAddress: text("recipients_address").notNull(),
+  recipientsEmail: text("recipients_email").notNull(),
+  recipientsPhone: text("recipients_phone").notNull(),
+  descriptionOfNeed: text("description_of_need").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
