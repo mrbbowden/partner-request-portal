@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { Handshake, User, Settings } from "lucide-react";
 import { Link } from "wouter";
-import PartnerLookup, { type PartnerLookupRef } from "@/components/partner-lookup";
-import PartnerInfo from "@/components/partner-info";
-import RequestForm from "@/components/request-form";
-import type { Partner } from "@shared/schema";
-import { getPartnerIdCookie } from "@/lib/cookies";
+import PartnerLookup, { type PartnerLookupRef } from "../components/partner-lookup";
+import PartnerInfo from "../components/partner-info";
+import RequestForm from "../components/request-form";
+import type { Partner } from "../../shared/schema";
+import { getPartnerIdCookie } from "../lib/cookies";
 
 export default function PartnerPortal() {
   const [partner, setPartner] = useState<Partner | null>(null);
