@@ -10,7 +10,6 @@ const insertRequestSchema = z.object({
   caseManagerEmail: z.string().email("Invalid email format"),
   caseManagerPhone: z.string().min(1, "Case Manager's Phone is required"),
   preferredContact: z.string().min(1, "Preferred Contact is required"),
-  requestType: z.string().min(1, "Request Type is required"),
   urgency: z.string().min(1, "Urgency is required"),
   description: z.string().min(1, "Description is required"),
   // New recipient fields
@@ -37,7 +36,6 @@ async function sendToZapier(data: any) {
         caseManagerEmail: data.caseManagerEmail,
         caseManagerPhone: data.caseManagerPhone,
         preferredContact: data.preferredContact,
-        requestType: data.requestType,
         urgency: data.urgency,
         description: data.description,
         // New recipient fields
@@ -91,7 +89,6 @@ export async function onRequest(context: any) {
       caseManagerEmail: validatedData.caseManagerEmail,
       caseManagerPhone: validatedData.caseManagerPhone,
       preferredContact: validatedData.preferredContact,
-      requestType: validatedData.requestType,
       urgency: validatedData.urgency,
       description: validatedData.description,
       // New recipient fields

@@ -21,7 +21,6 @@ interface RequestFormData {
   caseManagerEmail: string;
   caseManagerPhone: string;
   preferredContact: string;
-  requestType: string;
   urgency: string;
   description: string;
   // New recipient fields
@@ -46,7 +45,6 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
     caseManagerEmail: partner.caseManagerEmail,
     caseManagerPhone: partner.caseManagerPhone,
     preferredContact: '',
-    requestType: '',
     urgency: '',
     description: '',
     // New recipient fields
@@ -64,7 +62,7 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
     
     // Validate required fields
     const requiredFields = [
-      'requestType', 'description', 'urgency', 'preferredContact',
+      'description', 'urgency', 'preferredContact',
       'recipientsName', 'recipientsAddress', 'recipientsEmail', 'recipientsPhone', 'descriptionOfNeed'
     ];
     
@@ -98,7 +96,6 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
       setFormData({
         ...formData,
         preferredContact: '',
-        requestType: '',
         urgency: '',
         description: '',
         recipientsName: '',
@@ -121,7 +118,6 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
     setFormData({
       ...formData,
       preferredContact: '',
-      requestType: '',
       urgency: '',
       description: '',
       recipientsName: '',
@@ -210,22 +206,6 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
             <h3 className="text-lg font-semibold mb-4">Request Details</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="requestType">Request Type</Label>
-                <Select value={formData.requestType} onValueChange={(value) => setFormData({ ...formData, requestType: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select request type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="support">Technical Support</SelectItem>
-                    <SelectItem value="billing">Billing Question</SelectItem>
-                    <SelectItem value="feature">Feature Request</SelectItem>
-                    <SelectItem value="bug">Bug Report</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div>
                 <Label htmlFor="urgency">Urgency</Label>
                 <Select value={formData.urgency} onValueChange={(value) => setFormData({ ...formData, urgency: value })}>

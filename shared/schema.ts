@@ -19,7 +19,6 @@ export const requests = pgTable("requests", {
   caseManagerEmail: text("case_manager_email").notNull(),
   caseManagerPhone: text("case_manager_phone").notNull(),
   preferredContact: text("preferred_contact").notNull(),
-  requestType: text("request_type").notNull(),
   urgency: text("urgency").notNull(),
   description: text("description").notNull(),
   // New recipient fields

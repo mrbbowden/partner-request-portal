@@ -29,7 +29,6 @@ interface Request {
   caseManagerEmail: string;
   caseManagerPhone: string;
   preferredContact: string;
-  requestType: string;
   urgency: string;
   description: string;
   // New recipient fields
@@ -55,7 +54,6 @@ interface RequestFormData {
   caseManagerEmail: string;
   caseManagerPhone: string;
   preferredContact: string;
-  requestType: string;
   urgency: string;
   description: string;
   // New recipient fields
@@ -427,9 +425,7 @@ export default function AdminPage() {
                     <TableCell>{request.partnerId}</TableCell>
                     <TableCell>{request.partnerName}</TableCell>
                     <TableCell>{request.referringCaseManager}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{request.requestType}</Badge>
-                    </TableCell>
+
                     <TableCell>
                       <Badge variant={request.urgency === 'urgent' ? 'destructive' : 'default'}>
                         {request.urgency}
@@ -641,7 +637,6 @@ function RequestForm({
     caseManagerEmail: request?.caseManagerEmail || '',
     caseManagerPhone: request?.caseManagerPhone || '',
     preferredContact: request?.preferredContact || '',
-    requestType: request?.requestType || '',
     urgency: request?.urgency || '',
     description: request?.description || '',
     // New recipient fields
@@ -811,21 +806,6 @@ function RequestForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="requestType">Request Type</Label>
-            <Select value={formData.requestType} onValueChange={(value) => setFormData({ ...formData, requestType: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select request type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="support">Technical Support</SelectItem>
-                <SelectItem value="billing">Billing Question</SelectItem>
-                <SelectItem value="feature">Feature Request</SelectItem>
-                <SelectItem value="bug">Bug Report</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           <div>
             <Label htmlFor="urgency">Urgency</Label>
             <Select value={formData.urgency} onValueChange={(value) => setFormData({ ...formData, urgency: value })}>
