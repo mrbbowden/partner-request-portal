@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useImperativeHandle, forwardRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, AlertCircle } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import type { Partner } from "@shared/schema";
-import { setPartnerIdCookie, clearPartnerIdCookie } from "@/lib/cookies";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import type { Partner } from "../../../shared/schema";
+import { setPartnerIdCookie, clearPartnerIdCookie } from "../lib/cookies";
 
 interface PartnerLookupProps {
   onPartnerFound: (partner: Partner) => void;

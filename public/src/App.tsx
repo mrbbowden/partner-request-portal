@@ -4,33 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import HomePage from './pages/partner-portal';
 import AdminPage from './pages/admin';
 
-// Define interfaces
-interface Partner {
-  id: string;
-  partnerName: string;
-  referringCaseManager: string;
-  caseManagerEmail: string;
-  caseManagerPhone: string;
-}
-
-interface Request {
-  partnerId: string;
-  partnerName: string;
-  referringCaseManager: string;
-  caseManagerEmail: string;
-  caseManagerPhone: string;
-  preferredContact: string;
-  requestType: string;
-  urgency: string;
-  description: string;
-  // New recipient fields
-  recipientsName: string;
-  recipientsAddress: string;
-  recipientsEmail: string;
-  recipientsPhone: string;
-  descriptionOfNeed: string;
-}
-
 // Create a client
 const queryClient = new QueryClient();
 
