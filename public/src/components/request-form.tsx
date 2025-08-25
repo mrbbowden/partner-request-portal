@@ -140,71 +140,8 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Request Details Section */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Request Details</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="requestType">Request Type</Label>
-                <Select value={formData.requestType} onValueChange={(value) => setFormData({ ...formData, requestType: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select request type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="support">Technical Support</SelectItem>
-                    <SelectItem value="billing">Billing Question</SelectItem>
-                    <SelectItem value="feature">Feature Request</SelectItem>
-                    <SelectItem value="bug">Bug Report</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="urgency">Urgency</Label>
-                <Select value={formData.urgency} onValueChange={(value) => setFormData({ ...formData, urgency: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select urgency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Please describe your request..."
-                required
-              />
-            </div>
-
-            <div className="mt-4">
-              <Label htmlFor="preferredContact">Preferred Contact Method</Label>
-              <Select value={formData.preferredContact} onValueChange={(value) => setFormData({ ...formData, preferredContact: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select contact method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="phone">Phone</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           {/* Recipient Information Section */}
-          <div className="border-t pt-6">
+          <div>
             <h3 className="text-lg font-semibold mb-4">Recipient Information</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,6 +202,69 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
                 placeholder="Describe what the recipient needs..."
                 required
               />
+            </div>
+          </div>
+
+          {/* Request Details Section */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg font-semibold mb-4">Request Details</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="requestType">Request Type</Label>
+                <Select value={formData.requestType} onValueChange={(value) => setFormData({ ...formData, requestType: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select request type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="support">Technical Support</SelectItem>
+                    <SelectItem value="billing">Billing Question</SelectItem>
+                    <SelectItem value="feature">Feature Request</SelectItem>
+                    <SelectItem value="bug">Bug Report</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="urgency">Urgency</Label>
+                <Select value={formData.urgency} onValueChange={(value) => setFormData({ ...formData, urgency: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select urgency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Please describe your request..."
+                required
+              />
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="preferredContact">Preferred Contact Method</Label>
+              <Select value={formData.preferredContact} onValueChange={(value) => setFormData({ ...formData, preferredContact: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select contact method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="both">Both</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
