@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { useToast } from '../hooks/use-toast';
+import { Settings, Users, FileText, Plus, Edit, Trash2, ArrowLeft, Shield } from 'lucide-react';
 
 // Define interfaces
 interface Partner {
@@ -267,10 +268,14 @@ export default function AdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center p-6">
         <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Admin Login</CardTitle>
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <Shield className="text-white w-8 h-8" />
+            </div>
+            <CardTitle className="text-2xl">Admin Login</CardTitle>
+            <p className="text-gray-600">Enter password to access admin panel</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -295,247 +300,301 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-            <p className="text-gray-600">Manage partners and requests</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Panel</h1>
+              <p className="text-gray-600 text-lg">Manage partners and requests</p>
+            </div>
+            <div className="flex gap-4">
+              <a href="/" className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Portal
+              </a>
+              <Button onClick={handleLogout} variant="outline">
+                Logout
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-4">
-            <a href="/" className="text-blue-600 hover:text-blue-800">
-              Back to Portal
-            </a>
-            <Button onClick={handleLogout} variant="outline">
-              Logout
-            </Button>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                    <Users className="text-white w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-sm">Total Partners</p>
+                    <p className="text-3xl font-bold text-gray-900">{partners.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
+                    <FileText className="text-white w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-sm">Total Requests</p>
+                    <p className="text-3xl font-bold text-gray-900">{requests.length}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+
+          {/* Partners Section */}
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <Users className="w-6 h-6 mr-3 text-blue-600" />
+                  <CardTitle className="text-2xl">Partners</CardTitle>
+                </div>
+                <Button onClick={() => setShowPartnerDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Partner
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Partner Name</TableHead>
+                      <TableHead>Referring Case Manager</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {partners.map((partner: Partner) => (
+                      <TableRow key={partner.id}>
+                        <TableCell className="font-mono">{partner.id}</TableCell>
+                        <TableCell className="font-medium">{partner.partnerName}</TableCell>
+                        <TableCell>{partner.referringCaseManager}</TableCell>
+                        <TableCell>{partner.caseManagerEmail}</TableCell>
+                        <TableCell>{partner.caseManagerPhone}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingPartner(partner);
+                                setShowPartnerDialog(true);
+                              }}
+                            >
+                              <Edit className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => setDeletingPartner(partner)}
+                                >
+                                  <Trash2 className="w-3 h-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Partner</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete partner {partner.partnerName}? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() => deletePartnerMutation.mutate(partner.id)}
+                                    disabled={deletePartnerMutation.isPending}
+                                  >
+                                    {deletePartnerMutation.isPending ? "Deleting..." : "Delete"}
+                                  </Button>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Requests Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <FileText className="w-6 h-6 mr-3 text-green-600" />
+                  <CardTitle className="text-2xl">Requests</CardTitle>
+                </div>
+                <Button onClick={() => setShowRequestDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Request
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Partner</TableHead>
+                      <TableHead>Recipient</TableHead>
+                      <TableHead>Urgency</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {requests.map((request: Request) => (
+                      <TableRow key={request.id}>
+                        <TableCell className="font-mono">{request.id}</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{request.partnerName}</p>
+                            <p className="text-sm text-gray-500">ID: {request.partnerId}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{request.recipientsName}</p>
+                            <p className="text-sm text-gray-500">{request.recipientsEmail}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={request.urgency === 'urgent' ? 'destructive' : 'default'}>
+                            {request.urgency}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="max-w-xs truncate">{request.descriptionOfNeed}</TableCell>
+                        <TableCell>{new Date(request.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingRequest(request);
+                                setShowRequestDialog(true);
+                              }}
+                            >
+                              <Edit className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => setDeletingRequest(request)}
+                                >
+                                  <Trash2 className="w-3 h-3 mr-1" />
+                                  Delete
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Request</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this request? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() => deleteRequestMutation.mutate(request.id)}
+                                    disabled={deleteRequestMutation.isPending}
+                                  >
+                                    {deleteRequestMutation.isPending ? "Deleting..." : "Delete"}
+                                  </Button>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Partner Dialog */}
+          <Dialog open={showPartnerDialog} onOpenChange={setShowPartnerDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingPartner ? 'Edit Partner' : 'Add Partner'}
+                </DialogTitle>
+              </DialogHeader>
+              <PartnerForm
+                partner={editingPartner}
+                onSubmit={(data) => {
+                  if (editingPartner) {
+                    updatePartnerMutation.mutate({ id: editingPartner.id, data });
+                  } else {
+                    createPartnerMutation.mutate(data);
+                  }
+                }}
+                onCancel={() => {
+                  setShowPartnerDialog(false);
+                  setEditingPartner(null);
+                }}
+                isLoading={createPartnerMutation.isPending || updatePartnerMutation.isPending}
+              />
+            </DialogContent>
+          </Dialog>
+
+          {/* Request Dialog */}
+          <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingRequest ? 'Edit Request' : 'Add Request'}
+                </DialogTitle>
+              </DialogHeader>
+              <RequestForm
+                request={editingRequest}
+                partners={partners}
+                onSubmit={(data) => {
+                  if (editingRequest) {
+                    updateRequestMutation.mutate({ id: editingRequest.id, data });
+                  } else {
+                    createRequestMutation.mutate(data);
+                  }
+                }}
+                onCancel={() => {
+                  setShowRequestDialog(false);
+                  setEditingRequest(null);
+                }}
+                isLoading={createRequestMutation.isPending || updateRequestMutation.isPending}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
-
-        {/* Partners Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Partners</CardTitle>
-              <Button onClick={() => setShowPartnerDialog(true)}>
-                Add Partner
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Partner Name</TableHead>
-                  <TableHead>Referring Case Manager</TableHead>
-                  <TableHead>Case Manager's Email</TableHead>
-                  <TableHead>Case Manager's Phone</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {partners.map((partner: Partner) => (
-                  <TableRow key={partner.id}>
-                    <TableCell>{partner.id}</TableCell>
-                    <TableCell>{partner.partnerName}</TableCell>
-                    <TableCell>{partner.referringCaseManager}</TableCell>
-                    <TableCell>{partner.caseManagerEmail}</TableCell>
-                    <TableCell>{partner.caseManagerPhone}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingPartner(partner);
-                            setShowPartnerDialog(true);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => setDeletingPartner(partner)}
-                            >
-                              Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Partner</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete partner {partner.partnerName}? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <Button
-                                variant="destructive"
-                                onClick={() => deletePartnerMutation.mutate(partner.id)}
-                                disabled={deletePartnerMutation.isPending}
-                              >
-                                {deletePartnerMutation.isPending ? "Deleting..." : "Delete"}
-                              </Button>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        {/* Requests Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Requests</CardTitle>
-              <Button onClick={() => setShowRequestDialog(true)}>
-                Add Request
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Partner ID</TableHead>
-                  <TableHead>Partner Name</TableHead>
-                  <TableHead>Referring Case Manager</TableHead>
-                  <TableHead>Request Type</TableHead>
-                  <TableHead>Urgency</TableHead>
-                  <TableHead>Recipient's Name</TableHead>
-                  <TableHead>Description of Need</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {requests.map((request: Request) => (
-                  <TableRow key={request.id}>
-                    <TableCell>{request.id}</TableCell>
-                    <TableCell>{request.partnerId}</TableCell>
-                    <TableCell>{request.partnerName}</TableCell>
-                    <TableCell>{request.referringCaseManager}</TableCell>
-
-                    <TableCell>
-                      <Badge variant={request.urgency === 'urgent' ? 'destructive' : 'default'}>
-                        {request.urgency}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{request.recipientsName}</TableCell>
-                    <TableCell className="max-w-xs truncate">{request.descriptionOfNeed}</TableCell>
-                    <TableCell>{new Date(request.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingRequest(request);
-                            setShowRequestDialog(true);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => setDeletingRequest(request)}
-                            >
-                              Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Request</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this request? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <Button
-                                variant="destructive"
-                                onClick={() => deleteRequestMutation.mutate(request.id)}
-                                disabled={deleteRequestMutation.isPending}
-                              >
-                                {deleteRequestMutation.isPending ? "Deleting..." : "Delete"}
-                              </Button>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        {/* Partner Dialog */}
-        <Dialog open={showPartnerDialog} onOpenChange={setShowPartnerDialog}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {editingPartner ? 'Edit Partner' : 'Add Partner'}
-              </DialogTitle>
-            </DialogHeader>
-            <PartnerForm
-              partner={editingPartner}
-              onSubmit={(data) => {
-                if (editingPartner) {
-                  updatePartnerMutation.mutate({ id: editingPartner.id, data });
-                } else {
-                  createPartnerMutation.mutate(data);
-                }
-              }}
-              onCancel={() => {
-                setShowPartnerDialog(false);
-                setEditingPartner(null);
-              }}
-              isLoading={createPartnerMutation.isPending || updatePartnerMutation.isPending}
-            />
-          </DialogContent>
-        </Dialog>
-
-        {/* Request Dialog */}
-        <Dialog open={showRequestDialog} onOpenChange={setShowRequestDialog}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {editingRequest ? 'Edit Request' : 'Add Request'}
-              </DialogTitle>
-            </DialogHeader>
-            <RequestForm
-              request={editingRequest}
-              partners={partners}
-              onSubmit={(data) => {
-                if (editingRequest) {
-                  updateRequestMutation.mutate({ id: editingRequest.id, data });
-                } else {
-                  createRequestMutation.mutate(data);
-                }
-              }}
-              onCancel={() => {
-                setShowRequestDialog(false);
-                setEditingRequest(null);
-              }}
-              isLoading={createRequestMutation.isPending || updateRequestMutation.isPending}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

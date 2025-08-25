@@ -5,6 +5,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useToast } from '../hooks/use-toast';
 
 interface Partner {
   id: string;
@@ -38,6 +39,7 @@ interface RequestFormProps {
 }
 
 export default function RequestForm({ partner, onRequestSubmitted, onClearForm }: RequestFormProps) {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<RequestFormData>({
     partnerId: partner.id,
     partnerName: partner.partnerName,
@@ -60,7 +62,6 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
     const requiredFields = [
       'description', 'urgency', 'preferredContact',
       'recipientsName', 'recipientsAddress', 'recipientsEmail', 'recipientsPhone', 'descriptionOfNeed'
@@ -68,7 +69,7 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
     
     for (const field of requiredFields) {
       if (!formData[field as keyof RequestFormData]) {
-        alert(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+        toast({ title: 'Missing field', description: `Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`, variant: 'destructive' });
         return;
       }
     }
@@ -78,21 +79,18 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
     try {
       const response = await fetch('/api/requests', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to submit request');
       }
 
-      const result = await response.json();
-      console.log("Request submitted successfully:", result);
-
-      // Clear form
+      await response.json().catch(() => ({}));
+      toast({ title: 'Success', description: 'Request submitted successfully' });
+      onRequestSubmitted();
       setFormData({
         ...formData,
         preferredContact: '',
@@ -104,137 +102,23 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
         recipientsPhone: '',
         descriptionOfNeed: '',
       });
-
-      onRequestSubmitted();
-    } catch (error) {
-      console.error("Error submitting request:", error);
-      alert('Error submitting request: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } catch (err) {
+      toast({ title: 'Error', description: err instanceof Error ? err.message : 'Failed to submit request', variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleClearForm = () => {
-    setFormData({
-      ...formData,
-      preferredContact: '',
-      urgency: '',
-      description: '',
-      recipientsName: '',
-      recipientsAddress: '',
-      recipientsEmail: '',
-      recipientsPhone: '',
-      descriptionOfNeed: '',
-    });
-    onClearForm();
-  };
-
   return (
-    <Card className="mt-6">
+    <Card className="border-white/20 bg-white/5 backdrop-blur-xl text-white">
       <CardHeader>
         <CardTitle>Submit Request</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Recipient Information Section */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Recipient Information</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="recipientsName">Recipient's Name</Label>
-                <Input
-                  id="recipientsName"
-                  value={formData.recipientsName}
-                  onChange={(e) => setFormData({ ...formData, recipientsName: e.target.value })}
-                  placeholder="Enter recipient's full name"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="recipientsEmail">Recipient's Email</Label>
-                <Input
-                  id="recipientsEmail"
-                  type="email"
-                  value={formData.recipientsEmail}
-                  onChange={(e) => setFormData({ ...formData, recipientsEmail: e.target.value })}
-                  placeholder="Enter recipient's email address"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div>
-                <Label htmlFor="recipientsPhone">Recipient's Phone</Label>
-                <Input
-                  id="recipientsPhone"
-                  value={formData.recipientsPhone}
-                  onChange={(e) => setFormData({ ...formData, recipientsPhone: e.target.value })}
-                  placeholder="Enter recipient's phone number"
-                  required
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="recipientsAddress">Recipient's Address</Label>
-                <Input
-                  id="recipientsAddress"
-                  value={formData.recipientsAddress}
-                  onChange={(e) => setFormData({ ...formData, recipientsAddress: e.target.value })}
-                  placeholder="Enter recipient's address"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <Label htmlFor="descriptionOfNeed">Description of Need</Label>
-              <Textarea
-                id="descriptionOfNeed"
-                value={formData.descriptionOfNeed}
-                onChange={(e) => setFormData({ ...formData, descriptionOfNeed: e.target.value })}
-                placeholder="Describe what the recipient needs..."
-                required
-              />
-            </div>
-          </div>
-
-          {/* Request Details Section */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Request Details</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="urgency">Urgency</Label>
-                <Select value={formData.urgency} onValueChange={(value) => setFormData({ ...formData, urgency: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select urgency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Please describe your request..."
-                required
-              />
-            </div>
-
-            <div className="mt-4">
-              <Label htmlFor="preferredContact">Preferred Contact Method</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="preferredContact">Preferred Contact</Label>
               <Select value={formData.preferredContact} onValueChange={(value) => setFormData({ ...formData, preferredContact: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select contact method" />
@@ -246,16 +130,54 @@ export default function RequestForm({ partner, onRequestSubmitted, onClearForm }
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Label htmlFor="urgency">Urgency</Label>
+              <Select value={formData.urgency} onValueChange={(value) => setFormData({ ...formData, urgency: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select urgency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Form Actions */}
-          <div className="flex gap-4 pt-4">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit Request'}
-            </Button>
-            <Button type="button" variant="outline" onClick={handleClearForm}>
-              Clear Form
-            </Button>
+          <div>
+            <Label htmlFor="description">Request Description</Label>
+            <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="recipientsName">Recipient's Name</Label>
+              <Input id="recipientsName" value={formData.recipientsName} onChange={(e) => setFormData({ ...formData, recipientsName: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="recipientsEmail">Recipient's Email</Label>
+              <Input id="recipientsEmail" type="email" value={formData.recipientsEmail} onChange={(e) => setFormData({ ...formData, recipientsEmail: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="recipientsPhone">Recipient's Phone</Label>
+              <Input id="recipientsPhone" value={formData.recipientsPhone} onChange={(e) => setFormData({ ...formData, recipientsPhone: e.target.value })} />
+            </div>
+            <div>
+              <Label htmlFor="recipientsAddress">Recipient's Address</Label>
+              <Input id="recipientsAddress" value={formData.recipientsAddress} onChange={(e) => setFormData({ ...formData, recipientsAddress: e.target.value })} />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="descriptionOfNeed">Description of Need</Label>
+            <Textarea id="descriptionOfNeed" value={formData.descriptionOfNeed} onChange={(e) => setFormData({ ...formData, descriptionOfNeed: e.target.value })} />
+          </div>
+
+          <div className="flex gap-2">
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'Submit Request'}</Button>
+            <Button type="button" variant="outline" onClick={onClearForm}>Clear</Button>
           </div>
         </form>
       </CardContent>

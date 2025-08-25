@@ -4,8 +4,15 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import type { Partner } from "../../../shared/schema";
 import { setPartnerIdCookie, clearPartnerIdCookie } from "../lib/cookies";
+
+interface Partner {
+  id: string;
+  partnerName: string;
+  referringCaseManager: string;
+  caseManagerEmail: string;
+  caseManagerPhone: string;
+}
 
 interface PartnerLookupProps {
   onPartnerFound: (partner: Partner) => void;
